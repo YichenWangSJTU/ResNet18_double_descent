@@ -122,8 +122,9 @@ def plot_training_curves(losses, accuracies):
 
 # 实验设置
 batch_size = 128
-epochs = 400
-widths = [1, 2, 4, 8, 10, 12, 16, 32, 64]  # 不同的网络宽度 k
+epochs = 200
+#widths = [1, 2, 4, 6, 8, 9, 10, 12, 16, 32, 64]  # 不同的网络宽度 k
+widths = [6, 8, 9, 10, 12]  # 不同的网络宽度 k
 results = []
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
