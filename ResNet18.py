@@ -7,10 +7,12 @@ import time
 # from drive.MyDrive.Colab.ResNet18.model import make_resnet18k
 from model import make_resnet18k
 import matplotlib.pyplot as plt
+import json
+import numpy as np
 
 
 # CIFAR-10 数据加载并预加载到内存
-def load_cifar10(batch_size):
+def load_cifar10(batch_size, noise_ratio=0.2, num_classes=10):
     transform = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
@@ -26,6 +28,19 @@ def load_cifar10(batch_size):
     train_targets = torch.tensor([data[1] for data in train_dataset])
     test_data = torch.stack([data[0] for data in test_dataset])
     test_targets = torch.tensor([data[1] for data in test_dataset])
+
+    # 添加噪声到训练标签
+    num_samples = len(train_targets)
+    num_noisy = int(noise_ratio * num_samples)
+    noisy_indices = torch.randperm(num_samples)[:num_noisy]  # 随机选择10%的样本
+
+    # 替换标签为随机类别（不等于原始类别）
+    for idx in noisy_indices:
+        original_label = train_targets[idx].item()
+        noisy_label = original_label
+        while noisy_label == original_label:
+            noisy_label = np.random.randint(0, num_classes)
+        train_targets[idx] = noisy_label
 
     # 使用 TensorDataset 包装数据并创建 DataLoader
     train_loader = DataLoader(TensorDataset(train_data, train_targets), batch_size=batch_size, shuffle=True)
@@ -142,6 +157,9 @@ for k in widths:
 
     # 绘制当前模型的训练曲线
     plot_training_curves(train_losses, train_accuracies)
+
+with open("results.json", "w") as f:
+    json.dump(results, f, indent=4)
 
 # 输出结果
 for result in results:
